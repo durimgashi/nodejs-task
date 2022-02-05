@@ -2,6 +2,7 @@ const { ENDPOINTS } = require('./utils/constants.js')
 const {sequelize, User} = require('./config/sequelize.js')
 const express = require('express')
 const app = module.exports = express()
+require('dotenv').config();
 const port = 3000
 
 app.use(express.json())
@@ -20,6 +21,8 @@ app.listen(port, async () => {
         console.error('Unable to connect to the database:', error)
     }
 })
+
+console.log(process.env.JWT_KEY)
 
 module.exports = {
     app

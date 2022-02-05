@@ -6,8 +6,8 @@ app.post(ENDPOINTS.SIGNUP, async (req, res) => {
     res.send(await controller.signUp(req.body))
 })
 
-app.get(ENDPOINTS.LOGIN, (req, res) => {
-
+app.post(ENDPOINTS.LOGIN, async (req, res) => {
+    res.send(await controller.login(req.body))
 })
 
 app.get(ENDPOINTS.USER, (req, res) => {

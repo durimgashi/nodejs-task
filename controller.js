@@ -1,8 +1,10 @@
 const {sequelize} = require('./config/sequelize.js')
-const {QueryTypes} = require("sequelize")
+const bcrypt = require('bcryptjs')
+const jwt = require("jsonwebtoken")
 
 const signUp = async (data) => {
     let {firstName, lastName, email, password} = data
+    password = await bcrypt.hash(password, 10)
 
     let result = await sequelize.query('CALL signup(:p_firstName, :p_lastName, :p_email, :p_password)', {
         replacements: {
@@ -16,6 +18,56 @@ const signUp = async (data) => {
     return result[0]
 }
 
+const login = async (data) => {
+    let {email, password} = data
+
+    if (!password)
+        return {
+            response_flag: 'NOK',
+            response_message: 'Password is required!'
+        }
+
+    let loginResult = await sequelize.query('CALL login(:p_email)', {
+        replacements: {
+            p_email: email ?? null
+        }
+    })
+
+    loginResult = loginResult[0]
+
+    if (loginResult.response_flag === 'NOK')
+        return {
+            response_flag: loginResult.response_flag,
+            response_message: loginResult.response_message
+        }
+
+    if (!await bcrypt.compare(password, loginResult.password))
+        return {
+            response_flag: 'NOK',
+            response_message: 'The password provided is incorrect!'
+        }
+
+    let jwt_token = jwt.sign(
+        {
+            user_id: loginResult.id,
+            firstName: loginResult.firstName,
+            lastName: loginResult.lastName,
+            email: loginResult.email,
+        },
+        process.env.JWT_KEY,
+        {
+            expiresIn: '2h'
+        }
+    )
+
+    return {
+        response_flag: 'OK',
+        response_message: 'Login successful!',
+        jwt_token: jwt_token
+    }
+}
+
 module.exports = {
-    signUp
+    signUp,
+    login
 }
