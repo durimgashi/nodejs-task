@@ -14,3 +14,5 @@ app.post(ENDPOINTS.LOGIN, async (req, res) => {
 app.get(ENDPOINTS.ME, verifyToken, async (req, res) => {
     res.send(res.user)
 })
+app.post(ENDPOINTS.UPDATE_PASSWORD, verifyToken, controller.updatePassword)
+app.get(ENDPOINTS.USER, verifyToken, controller.getUserByID)

@@ -1,6 +1,7 @@
 const {sequelize} = require('./config/sequelize.js')
 const bcrypt = require('bcryptjs')
 const jwt = require("jsonwebtoken")
+const {use} = require("express/lib/router");
 
 const signUp = async (data) => {
     let {firstName, lastName, username, email, password} = data
@@ -69,7 +70,63 @@ const login = async (data) => {
     }
 }
 
+const updatePassword = async (req, res, next) => {
+    const userData = res.user
+    const {oldPassword, newPassword, newPasswordRepeat} = req.body
+
+    let userResult = await sequelize.query('CALL getUser(:p_user_id)', {
+        replacements: {
+            p_user_id: userData.user_id
+        }
+    })
+    userResult = userResult[0]
+
+    if(userResult.response_flag === 'NOK')
+        res.send(NOK(userResult.response_message))
+    if(!oldPassword || !newPassword || !newPasswordRepeat)
+        res.send(NOK('All fields are required!'))
+    if (!await bcrypt.compare(oldPassword, userResult.password))
+        res.send(NOK('The old password is not correct!'))
+    if(newPassword !== newPasswordRepeat)
+        res.send(NOK('The new password do not match!'))
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10)
+    let updateResult = await sequelize.query('CALL updatePassword(:p_user_id, :p_new_password)', {
+        replacements: {
+            p_user_id: userData.user_id,
+            p_new_password: newPasswordHash
+        }
+    })
+
+    if(updateResult.response_flag === 'NOK')
+        res.send(NOK(userResult.response_message))
+
+    res.send(updateResult[0])
+}
+
+const getUserByID = async (req, res, next) => {
+    // const userID = res.user.user_id
+    const userID = req.params.id
+
+    const result = await sequelize.query('CALL getUserByID(:p_id)', {
+        replacements: {
+            p_id: userID
+        }
+    })
+
+    res.send(result[0])
+}
+
+const NOK = (message) => {
+    return {
+        response_flag: 'NOK',
+        response_message: message
+    }
+}
+
 module.exports = {
     signUp,
-    login
+    login,
+    updatePassword,
+    getUserByID
 }
