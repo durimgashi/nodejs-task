@@ -80,13 +80,15 @@ const updatePassword = async (req, res, next) => {
 const getUserByID = async (req, res, next) => {
     const userID = req.params.id
 
-    const user = await User.findOne({
-        attributes: ['id', 'firstName', 'lastName', 'username', 'email'],
-        where: { id: userID }
-    })
+    const user = await sequelize.query('SELECT ' +
+                                                '"OK" AS response_flag, ' +
+                                                'u.username AS username, ' +
+                                                'IFNULL(COUNT(l.user_id), 0) AS likes ' +
+                                            'FROM users u ' +
+                                                'LEFT JOIN likes l ON l.user_id = u.id ' +
+                                            'WHERE l.user_id = ' + userID, {})
 
-    if(user) return res.send(OK('Success', user))
-
+    if(user) return res.send(OK('Success', user[0]))
     res.send(NOK('User does not exist!'))
 }
 

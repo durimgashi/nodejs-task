@@ -7,7 +7,7 @@ require('dotenv').config();
 
 app.use(express.json())
 
-require('./routes')
+require('./utils/routes')
 
 app.listen(port, async () => {
     console.log('Server is up and running on port: ', 3000);

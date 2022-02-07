@@ -1,7 +1,7 @@
-const { ENDPOINTS } = require("./utils/constants");
-const controller = require('./controller')
-const app = require('./app.js')
-const { verifyToken } = require("./utils/authentication");
+const { ENDPOINTS } = require("./constants");
+const controller = require('../controller')
+const app = require('../app.js')
+const { verifyToken } = require("./authentication");
 
 app.post(ENDPOINTS.SIGNUP, controller.signUp)
 app.post(ENDPOINTS.LOGIN, controller.login)
