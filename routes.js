@@ -15,4 +15,11 @@ app.get(ENDPOINTS.ME, verifyToken, async (req, res) => {
     res.send(res.user)
 })
 app.post(ENDPOINTS.UPDATE_PASSWORD, verifyToken, controller.updatePassword)
+
 app.get(ENDPOINTS.USER, verifyToken, controller.getUserByID)
+
+app.post(ENDPOINTS.USER_LIKE, verifyToken, controller.likeUser)
+
+app.post(ENDPOINTS.USER_UNLIKE, verifyToken, controller.dislikeUser)
+
+app.get(ENDPOINTS.MOST_LIKED, verifyToken, controller.mostLiked)

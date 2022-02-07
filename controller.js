@@ -117,6 +117,41 @@ const getUserByID = async (req, res, next) => {
     res.send(result[0])
 }
 
+const likeUser = (req, res, next) => {
+    const liker_id = res.user.user_id
+    const user_id = res.params.id
+
+    const result = await sequelize.query('CALL likeUser(:p_user_id, :p_liker_id)', {
+        replacements: {
+            p_user_id: user_id,
+            p_liker_id: liker_id
+        }
+    })
+
+    res.send(result[0])
+}
+
+const dislikeUser = async (req, res, next) => {
+    const liker_id = res.user.user_id
+    const user_id = res.params.id
+
+    const result = await sequelize.query('CALL dislikeUser(:p_user_id, :p_liker_id)', {
+        replacements: {
+            p_user_id: user_id,
+            p_liker_id: liker_id
+        }
+    })
+
+    res.send(result[0])
+}
+
+const mostLiked = async (req, res, next) => {
+
+    const query = "SELECT u.username, COUNT(l.user_id) AS likes FROM users u LEFT JOIN likes l ON l.user_id = u.id GROUP BY u.username ORDER BY likes DESC;";
+
+    const result = await sequelize.query()
+}
+
 const NOK = (message) => {
     return {
         response_flag: 'NOK',
@@ -128,5 +163,8 @@ module.exports = {
     signUp,
     login,
     updatePassword,
-    getUserByID
+    getUserByID,
+    likeUser,
+    dislikeUser,
+    mostLiked
 }
