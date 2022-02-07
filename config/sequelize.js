@@ -71,6 +71,13 @@ const Like = sequelize.define('Like', {
 	timestamps: false
 });
 
+User.hasMany(Like, {
+	foreignKey: 'user_id',
+})
+
+User.hasMany(Like, {
+	foreignKey: 'liker_id'
+})
 
 module.exports = {
     sequelize,
