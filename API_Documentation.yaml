@@ -1,0 +1,560 @@
+openapi: 3.0.0
+info:
+  title: 'node-js-task '
+  version: '0.1'
+servers:
+  - url: 'http://localhost:3000'
+    description: 'Local server'
+paths:
+  /signup:
+    post:
+      summary: 'Used to create a new user'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - firstName
+                - lastName
+                - email
+                - username
+                - pasword
+              properties:
+                firstName:
+                  type: string
+                  example: John
+                lastName:
+                  type: string
+                  example: Doe
+                email:
+                  type: string
+                  example: johndoe
+                username:
+                  type: string
+                  example: johndoe@test.com
+                password:
+                  type: string
+                  example: Password123++
+              type: object
+      responses:
+        '200':
+          description: 'Returns an OK flag and a success message'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/signupSuccess'
+        '400':
+          description: 'Returns error for missing fields'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/signup400'
+        '409':
+          description: 'Returns error for duplicate entry in the database'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/signup409'
+
+  /login:
+    post:
+      summary: 'Used to login a user and genererat a new JWT token for authentication'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - username
+                - pasword
+              properties:
+                username:
+                  type: string
+                  example: johndoe@test.com
+                password:
+                  type: string
+                  example: Password123++
+              type: object
+      responses:
+        '200':
+          description: 'Returns logged in user infomration and a JWT token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/loginSuccess'
+        '404':
+          description: 'Returns error when the given username does not exist in the database'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/login404'
+
+  /me:
+    get:
+      summary: 'Returns the currently logged in user'
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: 'Returns logged in user infomration through a JWT token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/currentUserSuccess'
+        '401':
+          description: 'Returns an error when the JWT token is missing or invalid'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/missingJWT'
+
+  /me/update-password:
+    put:
+      summary: 'Update the password of the currently logged in user'
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - oldPassword
+                - newPassword
+                - newPasswordRepeat
+              properties:
+                oldPassword:
+                  type: string
+                  example: Password123++
+                newPassword:
+                  type: string
+                  example: Password123++
+                newPasswordRepeat:
+                  type: string
+                  example: Password123++
+              type: object
+      responses:
+        '200':
+          description: 'Returns an object confirming the password has been updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updatePasswordSuccess'
+        '400':
+          description: 'Returns error for missing fields'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updatePassword400'
+        '401':
+          description: 'Returns an error when the JWT token is missing or invalid'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/missingJWT'
+
+  /user/{id}:
+    get:
+      summary: 'Returns user information by ID'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          description: 'The ID of the user in the database'
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: 'Returns an object with the requested information'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userByIDSuccess'
+        '401':
+          description: 'Returns an error when the JWT token is missing or invalid'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/missingJWT'
+        '404':
+          description: 'Returns an error if the requested user does not exist'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userByID404'
+
+  /user/{id}/like:
+    post:
+      summary: 'Likes the user by ID'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          description: 'The ID of the user in the database'
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: 'Returns an object confirming the use has been liked'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/likeSuccess'
+        '401':
+          description: 'Returns an error when the JWT token is missing or invalid'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/missingJWT'
+        '404':
+          description: 'Returns an error if the requested user does not exist'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/like404'
+        '409':
+          description: 'Returns an error if the user has been liked already'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/likedAlready404'
+
+  /user/{id}/unlike:
+    delete:
+      summary: 'Unlikes the user by ID'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          description: 'The ID of the user in the database'
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: 'Returns an object confirming the use has been unliked'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/unlikeSuccess'
+        '401':
+          description: 'Returns an error when the JWT token is missing or invalid'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/missingJWT'
+        '404':
+          description: 'Returns an error if the requested user does not exist'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/unlike404'
+        '409':
+          description: 'Returns an error if the user has not been liked'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/notLiked404'
+
+  /most-liked:
+    get:
+      summary: 'Returns all usernames and likes in order of most to least likes'
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: 'Returns an array of objects containing usernames and likes'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/mostLiked'
+        '401':
+          description: 'Returns an error when the JWT token is missing or invalid'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/missingJWT'
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+
+    signupSuccess:
+      properties:
+        response_flag:
+          type: string
+          default: 'OK'
+        response_message:
+          type: string
+          default: 'Signup success!'
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              default: 1
+            firstName:
+              type: string
+              default: 'John'
+            lastName:
+              type: string
+              default: 'Doe'
+            username:
+              type: string
+              default: 'johndoe'
+            email:
+              type: string
+              default: 'johndoe@test.com'
+      type: object
+
+    signup400:
+      properties:
+        response_flag:
+          type: string
+          default: 'NOK'
+        response_message:
+          type: string
+          default: 'All fields are required!'
+      type: object
+
+    signup409:
+      properties:
+        response_flag:
+          type: string
+          default: 'NOK'
+        response_message:
+          type: string
+          default: '(field name) is taken!'
+      type: object
+
+    loginSuccess:
+      type: object
+      properties:
+        response_flag:
+          type: string
+          default: 'OK'
+        response_message:
+          type: string
+          default: 'Login successful'
+        data:
+          properties:
+            id:
+              type: integer
+              default: 1
+            firstName:
+              type: string
+              default: 'John'
+            lastName:
+              type: string
+              default: 'Doe'
+            username:
+              type: string
+              default: 'johndoe'
+            email:
+              type: string
+              default: 'johndoe@test.com'
+            jwt_token:
+              type: string
+              default: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9........'
+          type: object
+
+    login404:
+      properties:
+        response_flag:
+          type: string
+          default: 'NOK'
+        response_message:
+          type: string
+          default: 'Username does not exist'
+      type: object
+
+    login401:
+      properties:
+        response_flag:
+          type: string
+          default: 'NOK'
+        response_message:
+          type: string
+          default: 'The password is incorrect'
+      type: object
+
+    missingJWT:
+      properties:
+        response_flag:
+          type: string
+          default: 'NOK'
+        response_message:
+          type: string
+          default:
+            - 'The token provided is invalid'
+            - 'Not authorized'
+      type: object
+
+    currentUserSuccess:
+      properties:
+        response_flag:
+          type: string
+          default: 'OK'
+        response_message:
+          type: string
+          default: 'success'
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              default: 1
+            firstName:
+              type: string
+              default: 'John'
+            lastName:
+              type: string
+              default: 'Doe'
+            username:
+              type: string
+              default: 'johndoe'
+            email:
+              type: string
+              default: 'johndoe@test.com'
+      type: object
+
+    updatePasswordSuccess:
+      properties:
+        response_flag:
+          type: string
+          default: 'OK'
+        response_message:
+          type: string
+          default: 'Password updated succesfully'
+      type: object
+
+    updatePassword400:
+      properties:
+        response_flag:
+          type: string
+          default: 'NOK'
+        response_message:
+          type: string
+          default: 'All fields are required!'
+      type: object
+
+    userByIDSuccess:
+      properties:
+        response_flag:
+          type: string
+          default: 'OK'
+        response_message:
+          type: string
+          default: 'Success'
+        data:
+          properties:
+            username:
+              type: string
+              default: 'johndoe'
+            likes:
+              type: integer
+              default: 7
+          type: object
+      type: object
+
+    userByID404:
+      properties:
+        response_flag:
+          type: string
+          default: 'NOK'
+        response_message:
+          type: string
+          default: 'User does not exist!'
+      type: object
+
+    likeSuccess:
+      properties:
+        response_flag:
+          type: string
+          default: 'OK'
+        response_message:
+          type: string
+          default: 'You have successfully liked the user!'
+      type: object
+
+    likedAlready404:
+      properties:
+        response_flag:
+          type: string
+          default: 'NOK'
+        response_message:
+          type: string
+          default: 'You have already liked this user!'
+      type: object
+
+    like404:
+      properties:
+        response_flag:
+          type: string
+          default: 'NOK'
+        response_message:
+          type: string
+          default: 'User does not exist!'
+      type: object
+
+    unlike404:
+      properties:
+        response_flag:
+          type: string
+          default: 'NOK'
+        response_message:
+          type: string
+          default: 'User does not exist!'
+      type: object
+
+    unlikeSuccess:
+      properties:
+        response_flag:
+          type: string
+          default: 'OK'
+        response_message:
+          type: string
+          default: 'You have successfully unliked the user!'
+      type: object
+
+    notLiked404:
+      properties:
+        response_flag:
+          type: string
+          default: 'NOK'
+        response_message:
+          type: string
+          default: 'You have not liked this user!'
+      type: object
+
+    mostLiked:
+      properties:
+        response_flag:
+          type: string
+          default: 'OK'
+        response_message:
+          type: string
+          default: 'Success'
+        data:
+          type: array
+          items:
+            properties:
+              username:
+                type: string
+                default: 'johndoe'
+              likes:
+                type: string
+                default: 7
+            type: object
+      type: object

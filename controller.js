@@ -7,6 +7,10 @@ const jwt = require("jsonwebtoken")
 const signUp = async (req, res, next) => {
     try {
         let {firstName, lastName, username, email, password} = req.body
+
+        if(!firstName || !lastName || !username || !email || !password)
+            return res.status(400).send(NOK('All fields are required!'))
+
         password = await bcrypt.hash(password, 10)
 
         const create = await User.create({
@@ -17,9 +21,18 @@ const signUp = async (req, res, next) => {
             password: password
         })
 
-        return res.send(OK('Signup success!', create))
+        // creating new object so not to return password from create query
+        const newUser = {
+            'id': create.id,
+            'firstName': create.firstName,
+            'lastName': create.lastName,
+            'username': create.username,
+            'email': create.email
+        }
+
+        return res.send(OK('Signup success!', newUser))
     } catch (e) {
-        return res.send(NOK(e.errors[0].message))
+        return res.status(409).send(NOK(e.errors[0].message))
     }
 }
 
@@ -27,7 +40,7 @@ const login = async (req, res, next) => {
     let {username, password} = req.body
     const user = await User.findOne({where: {username: username ?? null}})
 
-    if(!user) return res.send(NOK("Username does not exist"))
+    if(!user) return res.status(404).send(NOK("Username does not exist"))
     if (!await bcrypt.compare(password, user.password)) return res.send(NOK('The password is incorrect'))
 
     let jwt_token = jwt.sign(
@@ -40,7 +53,7 @@ const login = async (req, res, next) => {
         },
         process.env.JWT_KEY,
         {
-            expiresIn: '2h'
+            expiresIn: '6h'
         }
     )
 
@@ -57,7 +70,7 @@ const login = async (req, res, next) => {
 }
 
 const getCurrentUser = async (req, res, next) => {
-    res.send(res.user)
+    res.send(OK('success', res.user))
 }
 
 const updatePassword = async (req, res, next) => {
@@ -66,9 +79,9 @@ const updatePassword = async (req, res, next) => {
     const userResult = await User.findOne({ where: { id: userData.user_id } })
 
     if(!oldPassword || !newPassword || !newPasswordRepeat)
-        return res.send(NOK('All fields are required!'))
+        return res.status(400).send(NOK('All fields are required!'))
     if (!await bcrypt.compare(oldPassword, userResult.password))
-        return res.send(NOK('The old password is not correct!'))
+        return res.status(401).send(NOK('The old password is not correct!'))
     if(newPassword !== newPasswordRepeat)
         return res.send(NOK('The new password do not match!'))
 
@@ -81,16 +94,16 @@ const updatePassword = async (req, res, next) => {
 const getUserByID = async (req, res, next) => {
     const userID = req.params.id
 
-    const user = await sequelize.query('SELECT ' +
-                                                '"OK" AS response_flag, ' +
-                                                'u.username AS username, ' +
-                                                'IFNULL(COUNT(l.user_id), 0) AS likes ' +
-                                            'FROM users u ' +
-                                                'LEFT JOIN likes l ON l.user_id = u.id ' +
-                                            'WHERE l.user_id = ' + userID, {})
+    const user =
+        await sequelize.query('SELECT ' +
+                                    'u.username AS username, ' +
+                                    'IFNULL(COUNT(l.user_id), 0) AS likes ' +
+                                'FROM users u ' +
+                                    'LEFT JOIN likes l ON l.user_id = u.id ' +
+                                'WHERE l.user_id = ' + userID, {})
 
-    if(user) return res.send(OK('Success', user[0]))
-    res.send(NOK('User does not exist!'))
+    if(user) return res.send(OK('Success', user[0][0]))
+    res.status(404).send(NOK('User does not exist!'))
 }
 
 const likeUser = async (req, res, next) => {
