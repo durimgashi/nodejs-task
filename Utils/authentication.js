@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { JWT_KEY } = process.env
 
-
 const verifyToken = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1]
 

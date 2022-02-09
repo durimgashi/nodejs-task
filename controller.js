@@ -56,7 +56,7 @@ const login = async (req, res, next) => {
 }
 
 const getCurrentUser = async (req, res, next) => {
-    res.send(req.user)
+    res.send(res.user)
 }
 
 const updatePassword = async (req, res, next) => {
