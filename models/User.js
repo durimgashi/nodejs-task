@@ -1,4 +1,4 @@
-const {sequelize, DataTypes} = require('../config/sequelize.js')
+const {sequelize, DataTypes} = require("../config/sequelize")
 
 const User = sequelize.define('User', {
     id: {
@@ -11,16 +11,32 @@ const User = sequelize.define('User', {
         allowNull: false
     },
     lastName: {
-        type: DataTypes.STRING 
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: {
+            msg: "This username is taken"
+        }
     },
     email: {
-        type: DataTypes.STRING 
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: {
+            msg: "This email is taken"
+        }
     },
     password: {
-        type: DataTypes.STRING
-    }
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: {
+            msg: "This username is taken"
+        }
+    },
 }, {
+    timestamps: false
+})
 
-});
-
-console.log(User === sequelize.models.User)
+module.exports = User

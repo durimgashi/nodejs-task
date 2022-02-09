@@ -1,7 +1,8 @@
-const {sequelize, User, Like} = require('./config/sequelize.js')
+const { sequelize } = require('./config/sequelize.js')
+const User = require('./models/User')
+const Like = require('./models/Like')
 const bcrypt = require('bcryptjs')
 const jwt = require("jsonwebtoken")
-const {use} = require("express/lib/router");
 
 const signUp = async (req, res, next) => {
     try {
@@ -16,9 +17,9 @@ const signUp = async (req, res, next) => {
             password: password
         })
 
-        res.send(OK('Signup success!', create))
+        return res.send(OK('Signup success!', create))
     } catch (e) {
-        res.send(NOK(e.errors[0].message))
+        return res.send(NOK(e.errors[0].message))
     }
 }
 

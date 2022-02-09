@@ -9,7 +9,6 @@ const ENDPOINTS = {
     MOST_LIKED: '/most-liked',
 }
 
-
 module.exports = {
     ENDPOINTS
 }
