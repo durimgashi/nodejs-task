@@ -41,7 +41,7 @@ const login = async (req, res, next) => {
     const user = await User.findOne({where: {username: username ?? null}})
 
     if(!user) return res.status(404).send(NOK("Username does not exist"))
-    if (!await bcrypt.compare(password, user.password)) return res.send(NOK('The password is incorrect'))
+    if (!await bcrypt.compare(password, user.password)) return res.status(401).send(NOK('The password is incorrect'))
 
     let jwt_token = jwt.sign(
         {
@@ -93,6 +93,9 @@ const updatePassword = async (req, res, next) => {
 
 const getUserByID = async (req, res, next) => {
     const userID = req.params.id
+    const findUser = await User.findOne({where: {id: userID}})
+
+    if(!findUser) return res.status(404).send(NOK('User does not exist!'))
 
     const user =
         await sequelize.query('SELECT ' +
@@ -102,8 +105,7 @@ const getUserByID = async (req, res, next) => {
                                     'LEFT JOIN likes l ON l.user_id = u.id ' +
                                 'WHERE l.user_id = ' + userID, {})
 
-    if(user) return res.send(OK('Success', user[0][0]))
-    res.status(404).send(NOK('User does not exist!'))
+    return res.send(OK('Success', user[0][0]))
 }
 
 const likeUser = async (req, res, next) => {
@@ -111,7 +113,7 @@ const likeUser = async (req, res, next) => {
     const user_id = req.params.id
     const userCheck = await User.findOne({ where: { id: user_id }})
 
-    if(!userCheck) return res.send(NOK('User does not exist!'))
+    if(!userCheck) return res.status(404).send(NOK('User does not exist!'))
     const likeCheck = await Like.findOne({
         where: {
             user_id: user_id,
@@ -119,7 +121,7 @@ const likeUser = async (req, res, next) => {
         }
     })
 
-    if (likeCheck) return res.send(NOK('You have already liked this user!'))
+    if (likeCheck) return res.status(409).send(NOK('You have already liked this user!'))
     const likeCreate = await Like.create({
         user_id: user_id,
         liker_id: liker_id
@@ -138,7 +140,7 @@ const dislikeUser = async (req, res, next) => {
         }
     })
 
-    if(!userCheck) return res.send(NOK('User does not exist!'))
+    if(!userCheck) return res.status(404).send(NOK('User does not exist!'))
 
     const likeCheck = await Like.findOne({
         where: {
@@ -148,7 +150,7 @@ const dislikeUser = async (req, res, next) => {
     })
 
     if (!likeCheck)
-        return res.send(NOK('You have not liked this user!'))
+        return res.status(409).send(NOK('You have not liked this user!'))
 
     const likeCreate = await Like.destroy({
         where: {
