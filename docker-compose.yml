@@ -1,0 +1,51 @@
+version: '3.8'
+services:
+
+#####---- MAIN MYSQL CONTAINER ----#####
+  mysqldb:
+    image: mariadb:10.4.22
+    container_name: mysql_main
+    environment:
+      MYSQL_DATABASE: 'nodejs-task'
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_ROOT_HOST: '%'
+      command: --default-authentication-plugin=mysql_native_password
+####---- TESTING MYSQL CONTAINER ----#####
+  mysqldb2:
+    container_name: mysql_test
+    image: mariadb:10.4.22
+    environment:
+      MYSQL_DATABASE: 'nodejs-task-2'
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_ROOT_HOST: '%'
+      command: --default-authentication-plugin=mysql_native_password
+
+####---- MAIN APP CONTAINER ----#####
+  app:
+    image: node_dev
+    container_name: app
+    environment:
+      - DB_HOST=mysqldb
+    depends_on:
+      - mysqldb 
+    ports:
+      - 0.0.0.0:3000:3000
+
+####---- TESTING APP CONTAINER ----#####
+  test:
+    image: node_test
+    container_name: app_test
+    environment:
+      - DB_HOST=mysqldb2
+    depends_on:
+      - mysqldb2
+    ports:
+      - 0.0.0.0:3002:3002
+    
+    
+
+      
+
+    

@@ -83,7 +83,7 @@ paths:
                 $ref: '#/components/schemas/loginSuccess'
         '401':
           description: 'Returns an error when the given password is incorrect'
-            content:
+          content:
               application/json:
                 schema:
                   $ref: '#/components/schemas/loginWrongPassword'

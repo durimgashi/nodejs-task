@@ -1,0 +1,10 @@
+FROM node:14
+EXPOSE 3002
+
+WORKDIR /app
+COPY . /app
+COPY /environment/test/.env .env
+RUN npm install && npm install pm2 -g
+RUN rm -rf Dockerfile.Main
+RUN chmod +x test.sh
+ENTRYPOINT ["sh", "./test.sh" ]

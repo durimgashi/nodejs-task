@@ -1,10 +1,10 @@
 const { ENDPOINTS } = require("./constants");
-const controller = require('../controller')
+const controller = require('./controller')
 const app = require('../app.js')
 const { verifyToken } = require("./authentication");
 const {sequelize} = require("../config/sequelize.js");
 require('dotenv').config();
-const port = process.env.PORT || 3000
+const port = process.env.PORT
 
 app.post(ENDPOINTS.SIGNUP, controller.signUp)
 app.post(ENDPOINTS.LOGIN, controller.login)
@@ -16,7 +16,7 @@ app.delete(ENDPOINTS.USER_UNLIKE, verifyToken, controller.dislikeUser)
 app.get(ENDPOINTS.MOST_LIKED, verifyToken, controller.mostLiked)
 
 app.listen(port, async () => {
-    console.log('Server is up and running on port: ', 3000);
+    console.log('Server is up and running on port: ', port);
     try {
         await sequelize.authenticate();
         console.log('Connection has been established successfully.')

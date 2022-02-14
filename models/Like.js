@@ -15,6 +15,7 @@ const Like = sequelize.define('Like', {
         allowNull: false
     }
 }, {
+    tableName: 'likes',
     timestamps: false
 })
 

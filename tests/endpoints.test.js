@@ -1,16 +1,19 @@
 const request = require('supertest')
 const app = require('../app')
-const controller = require('../controller')
+const controller = require('../utils/controller')
 const {sequelize} = require('../config/sequelize')
 const User = require('../models/User')
 const Like = require('../models/Like')
-
 let token
 
 beforeAll(async () => {
-    await sequelize .query('SET FOREIGN_KEY_CHECKS = 0', {})
-    await Like.truncate({ cascade: true })
-    await User.truncate({ cascade: true })
+    await sequelize.sync({ alter: true });
+        console.log("All models were synchronized successfully.")
+    await sequelize .query('SET FOREIGN_KEY_CHECKS = 0', {}) 
+
+    await Like.truncate({ cascade: true });
+    await User.truncate({ cascade: true });
+    
 });
 
 

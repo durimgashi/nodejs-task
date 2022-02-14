@@ -1,6 +1,6 @@
-const { sequelize } = require('./config/sequelize.js')
-const User = require('./models/User')
-const Like = require('./models/Like')
+const { sequelize } = require('../config/sequelize.js')
+const User = require('../models/User')
+const Like = require('../models/Like')
 const bcrypt = require('bcryptjs')
 const jwt = require("jsonwebtoken")
 
@@ -103,7 +103,7 @@ const getUserByID = async (req, res, next) => {
                                     'IFNULL(COUNT(l.user_id), 0) AS likes ' +
                                 'FROM users u ' +
                                     'LEFT JOIN likes l ON l.user_id = u.id ' +
-                                'WHERE l.user_id = ' + userID, {})
+                                'WHERE u.id = ' + userID, {})
 
     return res.send(OK('Success', user[0][0]))
 }
